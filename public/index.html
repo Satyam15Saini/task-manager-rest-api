@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Demonstration Interactive Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a; --surface: #1e293b; --surface-hover: #334155;
+      --text: #f8fafc; --text-muted: #94a3b8;
+      --primary: #3b82f6; --primary-hover: #60a5fa;
+      --success: #10b981; --error: #ef4444; --warning: #f59e0b;
+      --border: #334155;
+    }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 2rem; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    h1 { margin-top: 0; color: var(--text); text-align: center; }
+    h1 span { color: var(--primary); }
+    h3 { margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; width: 100%; max-width: 1200px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+    
+    .btn { background: var(--surface-hover); color: var(--text); border: 1px solid var(--border); padding: 0.75rem 1rem; border-radius: 6px; font-family: inherit; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; width: 100%; margin-bottom: 0.5rem;}
+    .btn:hover { background: var(--border); }
+    .btn-primary { background: var(--primary); color: white; border-color: transparent;}
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-danger { background: rgba(239, 68, 68, 0.2); color: var(--error); border-color: rgba(239, 68, 68, 0.5); }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.4); }
+
+    input { width: 100%; box-sizing: border-box; padding: 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: inherit; margin-bottom: 1rem; }
+    input:focus { outline: 2px solid var(--primary); }
+    
+    .badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 99px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+    .badge-error { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+    
+    .console { margin-top: 2rem; padding: 1rem; background: #000; border-radius: 8px; border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; width: 100%; max-width: 1200px; height: 250px; overflow-y: auto; color: var(--success); }
+    .log-entry { margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px dashed var(--border); }
+    .log-err { color: var(--error); }
+    .log-warn { color: var(--warning); }
+    .log-info { color: #38bdf8; }
+
+    .task-item { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;}
+    .task-id { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); cursor: pointer; background: var(--surface); padding: 0.2rem 0.5rem; border-radius: 4px; align-self: flex-start;}
+    .task-id:hover { background: var(--text); color: var(--bg); }
+    .task-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    
+    .section-auth, .section-dashboard { transition: opacity 0.3s; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <h1>Task Management <span>API Interactive Demo</span></h1>
+  <p style="color: var(--text-muted); margin-bottom: 2rem;">Dual-User Simulation Environment</p>
+
+  <div class="grid">
+    <!-- User A Container -->
+    <div class="card" id="userA">
+      <h3>Device A (User 1)</h3>
+      <div class="section-auth" id="authA">
+        <input type="email" id="emailA" value="alice@test.com">
+        <input type="password" id="passA" value="securepass">
+        <button class="btn btn-primary" onclick="handleAuth('A')">Register & Login</button>
+      </div>
+      <div class="section-dashboard hidden" id="dashA">
+        <p class="badge badge-success">Authenticated</p>
+        <p id="tokenA" style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); word-break: break-all; margin-bottom: 1.5rem;"></p>
+        
+        <h4>My Tasks</h4>
+        <div id="tasksA"></div>
+        
+        <h4>Create New Task</h4>
+        <input type="text" id="newTaskTitleA" placeholder="Create robust API...">
+        <button class="btn" onclick="createTask('A')">POST /api/tasks</button>
+
+        <h4>Attempt Negative Test</h4>
+        <input type="text" id="targetIdA" placeholder="Copy another User's Task ID here">
+        <button class="btn btn-danger" onclick="deleteTask('A', document.getElementById('targetIdA').value)">DELETE Task</button>
+        
+        <h4 style="margin-top: 2rem; color: var(--warning);">Trigger Validation Error</h4>
+        <button class="btn" style="border-color: var(--warning); color: var(--warning);" onclick="triggerValidationError('A')">POST Empty Task</button>
+      </div>
+    </div>
+
+    <!-- User B Container -->
+    <div class="card" id="userB">
+      <h3>Device B (User 2)</h3>
+      <div class="section-auth" id="authB">
+        <input type="email" id="emailB" value="bob@test.com">
+        <input type="password" id="passB" value="securepass">
+        <button class="btn btn-primary" onclick="handleAuth('B')">Register & Login</button>
+      </div>
+      <div class="section-dashboard hidden" id="dashB">
+        <p class="badge badge-success">Authenticated</p>
+        <p id="tokenB" style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); word-break: break-all; margin-bottom: 1.5rem;"></p>
+        
+        <h4>My Tasks</h4>
+        <div id="tasksB"></div>
+        
+        <h4>Create New Task</h4>
+        <input type="text" id="newTaskTitleB" placeholder="Test the endpoints...">
+        <button class="btn" onclick="createTask('B')">POST /api/tasks</button>
+
+        <h4>Attempt Negative Test (Cross-User)</h4>
+        <input type="text" id="targetIdB" placeholder="Task ID to delete...">
+        <button class="btn btn-danger" onclick="attemptHack()">Attempt to DELETE User A's Task</button>
+
+        <h4 style="margin-top: 2rem; color: var(--warning);">Trigger Validation Error</h4>
+        <button class="btn" style="border-color: var(--warning); color: var(--warning);" onclick="triggerValidationError('B')">POST Empty Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audit Log -->
+  <div class="console" id="logger">
+    <div style="color: var(--text-muted); margin-bottom: 1rem;">// SYSTEM AUDIT LOG READY...</div>
+  </div>
+
+  <script>
+    const state = { A: { token: null }, B: { token: null } };
+
+    function log(user, action, endpoint, status, response, isError = false) {
+      const el = document.getElementById('logger');
+      const time = new Date().toISOString().split('T')[1].substring(0,8);
+      const colorClass = isError ? 'log-err' : (status >= 200 && status < 300 ? 'log-success' : 'log-warn');
+      const methodLabel = `<span class="log-info">[${action}]</span>`;
+      
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `<strong style="color: var(--text-muted)">${time}</strong> | Device ${user} | ${methodLabel} ${endpoint} <br>
+                         <span class="${colorClass}">Status: ${status}</span> <br>
+                         <span style="color: var(--text-muted)">Response:</span> ${JSON.stringify(response)}`;
+      el.prepend(entry);
+    }
+
+    async function makeReq(user, method, endpoint, body = null) {
+      const headers = { 'Content-Type': 'application/json' };
+      if (state[user].token) headers['Authorization'] = `Bearer ${state[user].token}`;
+      
+      const req = { method, headers };
+      if (body) req.body = JSON.stringify(body);
+
+      const res = await fetch(endpoint, req);
+      const data = await res.json();
+      log(user, method, endpoint, res.status, data, !res.ok);
+      return { ok: res.ok, status: res.status, data };
+    }
+
+    async function handleAuth(user) {
+      const email = document.getElementById(`email${user}`).value.split('@')[0] + Date.now() + '@test.com';
+      const password = document.getElementById(`pass${user}`).value;
+
+      // Register
+      const reg = await makeReq(user, 'POST', '/api/auth/register', { email, password });
+      if(!reg.ok && reg.status !== 400) return; // 400 might mean exists, proceed to login
+
+      // Login
+      const login = await makeReq(user, 'POST', '/api/auth/login', { email, password });
+      if(login.ok) {
+        state[user].token = login.data.token;
+        document.getElementById(`auth${user}`).classList.add('hidden');
+        document.getElementById(`dash${user}`).classList.remove('hidden');
+        document.getElementById(`token${user}`).innerText = `JWT: ${login.data.token.substring(0,35)}...`;
+        await refreshTasks(user);
+      }
+    }
+
+    function renderTasks(user, tasks) {
+      const container = document.getElementById(`tasks${user}`);
+      container.innerHTML = tasks.length === 0 ? '<p style="color: var(--text-muted); font-size: 0.9rem;">No tasks found in MongoDB.</p>' : '';
+      
+      tasks.forEach(t => {
+        const d = document.createElement('div');
+        d.className = 'task-item';
+        d.innerHTML = `
+          <strong>${t.title}</strong>
+          <span class="badge ${t.status === 'completed' ? 'badge-success' : ''}" style="width: max-content; background: var(--surface-hover)">${t.status}</span>
+          <div class="task-id" onclick="navigator.clipboard.writeText('${t._id}'); alert('Copied ID: ${t._id}');" title="Click to copy ID">ID: ${t._id}</div>
+          <div class="task-actions">
+            <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="updateTask('${user}', '${t._id}', '${t.status === 'pending' ? 'completed' : 'pending'}')">Toggle Status</button>
+            <button class="btn btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="deleteTask('${user}', '${t._id}')">Delete</button>
+          </div>
+        `;
+        container.appendChild(d);
+      });
+    }
+
+    async function refreshTasks(user) {
+      const res = await makeReq(user, 'GET', '/api/tasks');
+      if (res.ok) renderTasks(user, res.data.tasks);
+    }
+
+    async function createTask(user) {
+      const title = document.getElementById(`newTaskTitle${user}`).value || 'Untitled Dummy Task';
+      const res = await makeReq(user, 'POST', '/api/tasks', { title, status: 'pending' });
+      if (res.ok) {
+        document.getElementById(`newTaskTitle${user}`).value = '';
+        await refreshTasks(user);
+      }
+    }
+
+    async function updateTask(user, taskId, newStatus) {
+      const res = await makeReq(user, 'PATCH', `/api/tasks/${taskId}`, { status: newStatus });
+      if (res.ok) await refreshTasks(user);
+    }
+
+    async function deleteTask(user, taskId) {
+      if(!taskId) { alert("Please provide a Task ID!"); return; }
+      const res = await makeReq(user, 'DELETE', `/api/tasks/${taskId}`);
+      if (res.ok) await refreshTasks(user);
+    }
+
+    async function triggerValidationError(user) {
+      // Intentionally missing the required 'title' field to trigger Joi validation error
+      await makeReq(user, 'POST', '/api/tasks', { description: 'Missing title!' });
+    }
+
+    async function attemptHack() {
+      // Get User A's first task ID from DOM directly for demo purposes
+      const tasksA = document.getElementById('tasksA').getElementsByClassName('task-id');
+      if (tasksA.length === 0) {
+        alert("User A needs to create a task first!");
+        return;
+      }
+      const targetId = tasksA[0].innerText.replace('ID: ', '').trim();
+      document.getElementById('targetIdB').value = targetId;
+      await deleteTask('B', targetId);
+    }
+  </script>
+
+</body>
+</html>
