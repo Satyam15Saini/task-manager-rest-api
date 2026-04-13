@@ -23,6 +23,14 @@ const taskSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
+  categoryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+  },
+  tags: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Tag',
+  }],
 }, {
   timestamps: true,
 });

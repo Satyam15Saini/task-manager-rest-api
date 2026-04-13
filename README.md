@@ -215,16 +215,19 @@ All Task endpoints are mapped under `/api/tasks` and **require authentication** 
     "description": "Milk, eggs, bread",
 
     "dueDate": "2024-12-01T12:00:00Z",
-
-    "status": "pending"
-
+    "status": "pending",
+    "categoryId": "64bcdeof123...",
+    "tags": ["64bedcf124..."]
   }
 
   ```
 
 - **Success Response**: `201 Created`
 
-
+### 3. Categories & Tags
+- **Categories Routes (`/api/categories`)**: `POST /`, `GET /`, `PATCH /:id`, `DELETE /:id`
+- **Tags Routes (`/api/tags`)**: `POST /`, `GET /`, `PATCH /:id`, `DELETE /:id`
+- Tasks can be filtered: `GET /api/tasks?categoryId=<catId>&tags=<tagId1>,<tagId2>`
 
 #### Get All Tasks
 
@@ -338,17 +341,21 @@ All Task endpoints are mapped under `/api/tasks` and **require authentication** 
 
 ---
 
-
-
 ## 🧠 Design Decisions
 
-1. **Dual-Database Architecture**: PostgreSQL was chosen for User Accounts to ensure strict relational integrity and ACID compliance for sensitive authentication data. MongoDB was chosen for Tasks to allow for flexible schema evolution (e.g., easily adding tags, comments, or dynamic statuses to tasks in the future without rigorous structural migrations).
+1. **Dual-Database Architecture**: PostgreSQL was chosen for User Accounts to ensure strict relational integrity and ACID compliance for sensitive authentication data. MongoDB was chosen for Tasks to allow for flexible schema evolution.
 
 2. **Stateless Authentication (JWT)**: JSON Web Tokens ensure the API horizontally scales without relying on server-side session memory.
 
 3. **Validation Layer Separation**: `express-validator` logic is decoupled into a dedicated `validators` directory and mounted sequentially in the Route chains. This prevents the controllers from becoming bloated with input-checking logic, preserving the Single Responsibility Principle.
 
-4. **Access Control**: Database queries explicitly require the `userId` attached to the authenticated JWT. This mathematically guarantees that a user cannot manipulate a task they do not own at the query execution level, avoiding the risk of application-layer logic bugs.
+4. **Access Control**: Database queries explicitly require the `userId` attached to the authenticated JWT. This mathematically guarantees that a user cannot manipulate a task they do not own at the query execution level.
+
+5. **Task Categorization and Tags (New)**: Rather than using pre-defined application-level categories, `Category` and `Tag` models are specific to each user (`userId`). This allows dynamic personalization according to different user workflows.
+
+6. **Real-time Reminders (New)**: Scheduled via **BullMQ** with **Redis**. When a task is created or its `dueDate` is established, a delayed job is queued. If the due date changes, the job is replaced.
+
+7. **External Service Webhooks (New)**: Implemented via **BullMQ** and **Axios**. Setting the status to `completed` will emit a webhook job. BullMQ natively provides **exponential backoff**, attempting delivery 3 times exponentially if the third-party endpoint is unreachable.
 
 ---
 

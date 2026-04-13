@@ -13,6 +13,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/categories', require('./routes/category.routes'));
+app.use('/api/tags', require('./routes/tag.routes'));
 
 // Serve static files for the demo frontend
 const path = require('path');
