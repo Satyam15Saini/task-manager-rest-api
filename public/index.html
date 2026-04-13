@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API Demonstration Interactive Dashboard</title>
+  <title>Task Management API - Enhanced Demo</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -18,7 +18,7 @@
     h1 span { color: var(--primary); }
     h3 { margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
     
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; width: 100%; max-width: 1200px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 2rem; width: 100%; max-width: 800px; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
     
     .btn { background: var(--surface-hover); color: var(--text); border: 1px solid var(--border); padding: 0.75rem 1rem; border-radius: 6px; font-family: inherit; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; width: 100%; margin-bottom: 0.5rem;}
@@ -28,207 +28,238 @@
     .btn-danger { background: rgba(239, 68, 68, 0.2); color: var(--error); border-color: rgba(239, 68, 68, 0.5); }
     .btn-danger:hover { background: rgba(239, 68, 68, 0.4); }
 
-    input { width: 100%; box-sizing: border-box; padding: 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: inherit; margin-bottom: 1rem; }
-    input:focus { outline: 2px solid var(--primary); }
+    input, select { width: 100%; box-sizing: border-box; padding: 0.75rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: inherit; margin-bottom: 1rem; }
+    input:focus, select:focus { outline: 2px solid var(--primary); }
     
     .badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 99px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
     .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-    .badge-error { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+    .badge-info { background: rgba(59, 130, 246, 0.2); color: var(--primary); }
     
-    .console { margin-top: 2rem; padding: 1rem; background: #000; border-radius: 8px; border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; width: 100%; max-width: 1200px; height: 250px; overflow-y: auto; color: var(--success); }
+    .console { margin-top: 2rem; padding: 1rem; background: #000; border-radius: 8px; border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; width: 100%; max-width: 800px; height: 300px; overflow-y: auto; color: var(--success); }
     .log-entry { margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px dashed var(--border); }
-    .log-err { color: var(--error); }
-    .log-warn { color: var(--warning); }
     .log-info { color: #38bdf8; }
+    .log-err { color: var(--error); }
 
     .task-item { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;}
-    .task-id { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); cursor: pointer; background: var(--surface); padding: 0.2rem 0.5rem; border-radius: 4px; align-self: flex-start;}
-    .task-id:hover { background: var(--text); color: var(--bg); }
+    .task-id { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); background: var(--surface); padding: 0.2rem 0.5rem; border-radius: 4px; align-self: flex-start;}
     .task-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
     
-    .section-auth, .section-dashboard { transition: opacity 0.3s; }
     .hidden { display: none; }
+    .form-group { display: flex; gap: 1rem; }
   </style>
 </head>
 <body>
 
-  <h1>Task Management <span>API Interactive Demo</span></h1>
-  <p style="color: var(--text-muted); margin-bottom: 2rem;">Dual-User Simulation Environment</p>
+  <h1>Task Management <span>Extended API Demo</span></h1>
+  <p style="color: var(--text-muted); margin-bottom: 2rem;">Assignment 3 Requirements Integration</p>
 
   <div class="grid">
-    <!-- User A Container -->
     <div class="card" id="userA">
-      <h3>Device A (User 1)</h3>
-      <div class="section-auth" id="authA">
-        <input type="email" id="emailA" value="alice@test.com">
-        <input type="password" id="passA" value="securepass">
-        <button class="btn btn-primary" onclick="handleAuth('A')">Register & Login</button>
+      <h3>Interactive Client</h3>
+      
+      <div id="authA">
+        <input type="email" id="email" value="tester@demo.com">
+        <input type="password" id="pass" value="securepass">
+        <button class="btn btn-primary" onclick="handleAuth()">Register & Login</button>
       </div>
-      <div class="section-dashboard hidden" id="dashA">
+
+      <div class="hidden" id="dashA">
         <p class="badge badge-success">Authenticated</p>
-        <p id="tokenA" style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); word-break: break-all; margin-bottom: 1.5rem;"></p>
         
-        <h4>My Tasks</h4>
-        <div id="tasksA"></div>
-        
-        <h4>Create New Task</h4>
-        <input type="text" id="newTaskTitleA" placeholder="Create robust API...">
-        <button class="btn" onclick="createTask('A')">POST /api/tasks</button>
+        <hr style="border:0; border-top: 1px solid var(--border); margin: 2rem 0;">
 
-        <h4>Attempt Negative Test</h4>
-        <input type="text" id="targetIdA" placeholder="Copy another User's Task ID here">
-        <button class="btn btn-danger" onclick="deleteTask('A', document.getElementById('targetIdA').value)">DELETE Task</button>
-        
-        <h4 style="margin-top: 2rem; color: var(--warning);">Trigger Validation Error</h4>
-        <button class="btn" style="border-color: var(--warning); color: var(--warning);" onclick="triggerValidationError('A')">POST Empty Task</button>
-      </div>
-    </div>
+        <!-- Categories & Tags Management -->
+        <h4>1. Taxonomy Mapping</h4>
+        <div class="form-group">
+          <input type="text" id="newCategory" placeholder="New Category Name">
+          <button class="btn" onclick="createCategory()">Create Category</button>
+        </div>
+        <div class="form-group">
+          <input type="text" id="newTag" placeholder="New Tag Name">
+          <button class="btn" onclick="createTag()">Create Tag</button>
+        </div>
 
-    <!-- User B Container -->
-    <div class="card" id="userB">
-      <h3>Device B (User 2)</h3>
-      <div class="section-auth" id="authB">
-        <input type="email" id="emailB" value="bob@test.com">
-        <input type="password" id="passB" value="securepass">
-        <button class="btn btn-primary" onclick="handleAuth('B')">Register & Login</button>
-      </div>
-      <div class="section-dashboard hidden" id="dashB">
-        <p class="badge badge-success">Authenticated</p>
-        <p id="tokenB" style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); word-break: break-all; margin-bottom: 1.5rem;"></p>
-        
-        <h4>My Tasks</h4>
-        <div id="tasksB"></div>
-        
-        <h4>Create New Task</h4>
-        <input type="text" id="newTaskTitleB" placeholder="Test the endpoints...">
-        <button class="btn" onclick="createTask('B')">POST /api/tasks</button>
+        <hr style="border:0; border-top: 1px solid var(--border); margin: 2rem 0;">
 
-        <h4>Attempt Negative Test (Cross-User)</h4>
-        <input type="text" id="targetIdB" placeholder="Task ID to delete...">
-        <button class="btn btn-danger" onclick="attemptHack()">Attempt to DELETE User A's Task</button>
+        <!-- Task Creation -->
+        <h4>2. Advanced Event-Driven Task</h4>
+        <input type="text" id="taskTitle" placeholder="Task Title (e.g. Test Webhook)">
+        <div class="form-group">
+          <select id="taskCategory"><option value="">No Category</option></select>
+          <select id="taskTag"><option value="">No Tag</option></select>
+        </div>
+        <input type="datetime-local" id="taskDue" title="Due Date (triggers BullMQ Reminder)">
+        <button class="btn btn-primary" onclick="createTask()">Create Task & Dispatch Event</button>
 
-        <h4 style="margin-top: 2rem; color: var(--warning);">Trigger Validation Error</h4>
-        <button class="btn" style="border-color: var(--warning); color: var(--warning);" onclick="triggerValidationError('B')">POST Empty Task</button>
+        <hr style="border:0; border-top: 1px solid var(--border); margin: 2rem 0;">
+
+        <!-- Filtering & Viewing -->
+        <h4>3. My Task Pipeline</h4>
+        <div class="form-group">
+          <select id="filterCategory" onchange="refreshTasks()">
+            <option value="">All Categories</option>
+          </select>
+          <button class="btn" onclick="refreshTasks()">Refresh</button>
+        </div>
+        <div id="tasksContainer"></div>
+
       </div>
     </div>
   </div>
 
-  <!-- Audit Log -->
   <div class="console" id="logger">
-    <div style="color: var(--text-muted); margin-bottom: 1rem;">// SYSTEM AUDIT LOG READY...</div>
+    <div style="color: var(--text-muted); margin-bottom: 1rem;">// SYSTEM EVENT LOG...</div>
   </div>
 
   <script>
-    const state = { A: { token: null }, B: { token: null } };
+    let token = null;
+    let categories = [];
+    let tags = [];
 
-    function log(user, action, endpoint, status, response, isError = false) {
+    function log(action, endpoint, res, isError = false) {
       const el = document.getElementById('logger');
-      const time = new Date().toISOString().split('T')[1].substring(0,8);
-      const colorClass = isError ? 'log-err' : (status >= 200 && status < 300 ? 'log-success' : 'log-warn');
-      const methodLabel = `<span class="log-info">[${action}]</span>`;
-      
+      const time = new Date().toLocaleTimeString();
       const entry = document.createElement('div');
-      entry.className = 'log-entry';
-      entry.innerHTML = `<strong style="color: var(--text-muted)">${time}</strong> | Device ${user} | ${methodLabel} ${endpoint} <br>
-                         <span class="${colorClass}">Status: ${status}</span> <br>
-                         <span style="color: var(--text-muted)">Response:</span> ${JSON.stringify(response)}`;
+      entry.className = `log-entry ${isError ? 'log-err' : ''}`;
+      entry.innerHTML = `<strong>${time}</strong> | <span class="log-info">[${action}]</span> ${endpoint} <br>
+                         <span style="color: var(--text-muted)">Payload:</span> ${JSON.stringify(res)}`;
       el.prepend(entry);
     }
 
-    async function makeReq(user, method, endpoint, body = null) {
+    async function req(method, endpoint, body = null) {
       const headers = { 'Content-Type': 'application/json' };
-      if (state[user].token) headers['Authorization'] = `Bearer ${state[user].token}`;
-      
-      const req = { method, headers };
-      if (body) req.body = JSON.stringify(body);
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const config = { method, headers };
+      if (body) config.body = JSON.stringify(body);
 
-      const res = await fetch(endpoint, req);
-      const data = await res.json();
-      log(user, method, endpoint, res.status, data, !res.ok);
-      return { ok: res.ok, status: res.status, data };
+      const res = await fetch(endpoint, config);
+      const data = await res.json().catch(() => ({}));
+      log(method, endpoint, data, !res.ok);
+      return { ok: res.ok, data };
     }
 
-    async function handleAuth(user) {
-      const email = document.getElementById(`email${user}`).value.split('@')[0] + Date.now() + '@test.com';
-      const password = document.getElementById(`pass${user}`).value;
+    async function handleAuth() {
+      const email = document.getElementById('email').value.split('@')[0] + Date.now() + '@demo.com';
+      const password = document.getElementById('pass').value;
 
-      // Register
-      const reg = await makeReq(user, 'POST', '/api/auth/register', { email, password });
-      if(!reg.ok && reg.status !== 400) return; // 400 might mean exists, proceed to login
-
-      // Login
-      const login = await makeReq(user, 'POST', '/api/auth/login', { email, password });
+      await req('POST', '/api/auth/register', { email, password });
+      const login = await req('POST', '/api/auth/login', { email, password });
+      
       if(login.ok) {
-        state[user].token = login.data.token;
-        document.getElementById(`auth${user}`).classList.add('hidden');
-        document.getElementById(`dash${user}`).classList.remove('hidden');
-        document.getElementById(`token${user}`).innerText = `JWT: ${login.data.token.substring(0,35)}...`;
-        await refreshTasks(user);
+        token = login.data.token;
+        document.getElementById('authA').classList.add('hidden');
+        document.getElementById('dashA').classList.remove('hidden');
+        await loadTaxonomy();
+        await refreshTasks();
       }
     }
 
-    function renderTasks(user, tasks) {
-      const container = document.getElementById(`tasks${user}`);
-      container.innerHTML = tasks.length === 0 ? '<p style="color: var(--text-muted); font-size: 0.9rem;">No tasks found in MongoDB.</p>' : '';
+    async function loadTaxonomy() {
+      const cRes = await req('GET', '/api/categories');
+      if(cRes.ok) categories = cRes.data.categories;
       
-      tasks.forEach(t => {
-        const d = document.createElement('div');
-        d.className = 'task-item';
-        d.innerHTML = `
-          <strong>${t.title}</strong>
-          <span class="badge ${t.status === 'completed' ? 'badge-success' : ''}" style="width: max-content; background: var(--surface-hover)">${t.status}</span>
-          <div class="task-id" onclick="navigator.clipboard.writeText('${t._id}'); alert('Copied ID: ${t._id}');" title="Click to copy ID">ID: ${t._id}</div>
-          <div class="task-actions">
-            <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="updateTask('${user}', '${t._id}', '${t.status === 'pending' ? 'completed' : 'pending'}')">Toggle Status</button>
-            <button class="btn btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="deleteTask('${user}', '${t._id}')">Delete</button>
-          </div>
-        `;
-        container.appendChild(d);
+      const tRes = await req('GET', '/api/tags');
+      if(tRes.ok) tags = tRes.data.tags;
+
+      updateSelects();
+    }
+
+    function updateSelects() {
+      const catSelect = document.getElementById('taskCategory');
+      const tagSelect = document.getElementById('taskTag');
+      const filSelect = document.getElementById('filterCategory');
+      
+      catSelect.innerHTML = '<option value="">No Category</option>';
+      filSelect.innerHTML = '<option value="">All Categories</option>';
+      categories.forEach(c => {
+        catSelect.innerHTML += `<option value="${c._id}">${c.name}</option>`;
+        filSelect.innerHTML += `<option value="${c._id}">${c.name}</option>`;
+      });
+
+      tagSelect.innerHTML = '<option value="">No Tag</option>';
+      tags.forEach(t => {
+        tagSelect.innerHTML += `<option value="${t._id}">${t.name}</option>`;
       });
     }
 
-    async function refreshTasks(user) {
-      const res = await makeReq(user, 'GET', '/api/tasks');
-      if (res.ok) renderTasks(user, res.data.tasks);
+    async function createCategory() {
+      const name = document.getElementById('newCategory').value;
+      if(!name) return;
+      await req('POST', '/api/categories', { name });
+      document.getElementById('newCategory').value = '';
+      await loadTaxonomy();
     }
 
-    async function createTask(user) {
-      const title = document.getElementById(`newTaskTitle${user}`).value || 'Untitled Dummy Task';
-      const res = await makeReq(user, 'POST', '/api/tasks', { title, status: 'pending' });
-      if (res.ok) {
-        document.getElementById(`newTaskTitle${user}`).value = '';
-        await refreshTasks(user);
+    async function createTag() {
+      const name = document.getElementById('newTag').value;
+      if(!name) return;
+      await req('POST', '/api/tags', { name });
+      document.getElementById('newTag').value = '';
+      await loadTaxonomy();
+    }
+
+    async function createTask() {
+      const title = document.getElementById('taskTitle').value || 'Unspecified Task';
+      const catId = document.getElementById('taskCategory').value;
+      const tagId = document.getElementById('taskTag').value;
+      const dueDate = document.getElementById('taskDue').value;
+
+      const payload = { title, status: 'pending' };
+      if (catId) payload.categoryId = catId;
+      if (tagId) payload.tags = [tagId];
+      if (dueDate) payload.dueDate = new Date(dueDate).toISOString();
+
+      const res = await req('POST', '/api/tasks', payload);
+      if(res.ok) await refreshTasks();
+    }
+
+    async function updateStatus(id, currentStatus) {
+      const newStatus = currentStatus === 'pending' ? 'completed' : 'pending';
+      const res = await req('PATCH', `/api/tasks/${id}`, { status: newStatus });
+      if(res.ok) {
+        if(newStatus === 'completed') log('EVENT', 'BullMQ Webhook Dispatched', 'View your backend console!', false);
+        await refreshTasks();
       }
     }
 
-    async function updateTask(user, taskId, newStatus) {
-      const res = await makeReq(user, 'PATCH', `/api/tasks/${taskId}`, { status: newStatus });
-      if (res.ok) await refreshTasks(user);
+    async function deleteTask(id) {
+      await req('DELETE', `/api/tasks/${id}`);
+      await refreshTasks();
     }
 
-    async function deleteTask(user, taskId) {
-      if(!taskId) { alert("Please provide a Task ID!"); return; }
-      const res = await makeReq(user, 'DELETE', `/api/tasks/${taskId}`);
-      if (res.ok) await refreshTasks(user);
-    }
-
-    async function triggerValidationError(user) {
-      // Intentionally missing the required 'title' field to trigger Joi validation error
-      await makeReq(user, 'POST', '/api/tasks', { description: 'Missing title!' });
-    }
-
-    async function attemptHack() {
-      // Get User A's first task ID from DOM directly for demo purposes
-      const tasksA = document.getElementById('tasksA').getElementsByClassName('task-id');
-      if (tasksA.length === 0) {
-        alert("User A needs to create a task first!");
+    async function refreshTasks() {
+      const fil = document.getElementById('filterCategory').value;
+      const endpoint = fil ? `/api/tasks?categoryId=${fil}` : '/api/tasks';
+      const res = await req('GET', endpoint);
+      
+      const container = document.getElementById('tasksContainer');
+      if(!res.ok || !res.data.tasks.length) {
+        container.innerHTML = '<p style="color: var(--text-muted)">No tasks found.</p>';
         return;
       }
-      const targetId = tasksA[0].innerText.replace('ID: ', '').trim();
-      document.getElementById('targetIdB').value = targetId;
-      await deleteTask('B', targetId);
+
+      container.innerHTML = '';
+      res.data.tasks.forEach(t => {
+        const catName = t.categoryId ? t.categoryId.name : 'Uncategorized';
+        const tagNames = t.tags && t.tags.length ? t.tags.map(tag => tag.name).join(', ') : 'No Tags';
+        const badge = t.status === 'completed' ? 'badge-success' : 'badge-info';
+        
+        container.innerHTML += `
+          <div class="task-item">
+            <div style="display:flex; justify-content:space-between;">
+              <strong>${t.title}</strong>
+              <span class="badge ${badge}">${t.status}</span>
+            </div>
+            <div class="task-id">Cat: ${catName} | Tags: ${tagNames}</div>
+            ${t.dueDate ? `<div class="task-id" style="color:var(--warning)">Due: ${new Date(t.dueDate).toLocaleString()}</div>` : ''}
+            <div class="task-actions">
+              <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="updateStatus('${t._id}', '${t.status}')">Toggle Status</button>
+              <button class="btn btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="deleteTask('${t._id}')">Delete</button>
+            </div>
+          </div>
+        `;
+      });
     }
   </script>
-
 </body>
 </html>
